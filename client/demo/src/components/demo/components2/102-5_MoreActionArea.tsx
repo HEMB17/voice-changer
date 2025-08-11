@@ -24,6 +24,7 @@ export const MoreActionArea = (_props: MoreActionAreaProps) => {
         return (
             <>
                 <div className="config-sub-area-control left-padding-1">
+                    {/*
                     <div className="config-sub-area-control-title">more...</div>
                     <div className="config-sub-area-control-field config-sub-area-control-field-long">
                         <div className="config-sub-area-buttons">
@@ -41,6 +42,7 @@ export const MoreActionArea = (_props: MoreActionAreaProps) => {
                             </div>
                         </div>
                     </div>
+                    */}
                 </div>
             </>
         );

@@ -133,6 +133,7 @@ export const HeaderArea = (props: HeaderAreaProps) => {
                 </div>
                 <div className="icons">
                     <span className="belongings">
+                        {/*
                         {githubLink}
                         {manualLink}
                         {toolLink}

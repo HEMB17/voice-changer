@@ -158,9 +158,9 @@ export const StartingNoticeDialog = () => {
 
         return (
             <div className="dialog-frame">
-                <div className="dialog-title">Message</div>
+                <div className="dialog-title">HuSa.IA</div>
                 <div className="dialog-content">
-                    {edition.indexOf("web") >= 0 ? contentForWeb : content}
+                    {/*edition.indexOf("web") >= 0 ? contentForWeb : content*/}
                     {closeButtonRow}
                 </div>
             </div>
