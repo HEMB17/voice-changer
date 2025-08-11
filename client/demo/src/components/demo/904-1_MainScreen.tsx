@@ -152,10 +152,12 @@ export const MainScreen = (props: MainScreenProps) => {
 
             // モデルを構成するファイル
             const generateFileRow = (title: string, filePath: string) => {
-                const fileValueClass = filePath.length > 0 ? "model-slot-detail-row-value-download  tooltip" : "model-slot-detail-row-value";
+                //const fileValueClass = filePath.length > 0 ? "model-slot-detail-row-value-download  tooltip" : "model-slot-detail-row-value";
                 return (
                     <div key={`${title}`} className="model-slot-detail-row">
                         <div className="model-slot-detail-row-label">{title}:</div>
+                        {/*
+
                         <div
                             className={fileValueClass}
                             onClick={() => {
@@ -165,6 +167,7 @@ export const MainScreen = (props: MainScreenProps) => {
                             {trimfileName(filePath, 20)}
                             <div className="tooltip-text tooltip-text-thin">{messageBuilderState.getMessage(__filename, "download")}</div>
                         </div>
+                        */}
                     </div>
                 );
             };
