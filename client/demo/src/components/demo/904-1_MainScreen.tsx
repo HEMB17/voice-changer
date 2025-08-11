@@ -159,7 +159,7 @@ export const MainScreen = (props: MainScreenProps) => {
                         <div
                             className={fileValueClass}
                             onClick={() => {
-                                fileValueAction(filePath);
+                                //fileValueAction(filePath);
                             }}
                         >
                             {trimfileName(filePath, 20)}
