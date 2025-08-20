@@ -53,7 +53,7 @@ class TrustedOriginMiddleware:
                 await self.app(scope, receive, send)  
                 return  
             else:  
-                response = PlainTextResponse("Access to model files denied", status_code=403)  
+                response = PlainTextResponse("Access to model files denied XD", status_code=403)  
                 await response(scope, receive, send)  
                 return 
 
