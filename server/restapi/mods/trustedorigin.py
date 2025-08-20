@@ -34,6 +34,22 @@ class TrustedOriginMiddleware:
 
         headers = Headers(scope=scope)
         origin = headers.get("origin", "")
+        path = scope.get("path", "")  
+        
+        # Verificar si es una ruta de modelo  
+        is_model_route = "/model_dir" in path  
+        
+        if is_model_route:  
+            # Para rutas de modelos, solo permitir orígenes locales  
+            local_origins = compute_local_origins()  
+            if not origin or origin in local_origins:  
+                await self.app(scope, receive, send)  
+                return  
+            else:  
+                response = PlainTextResponse("Access to model files denied", status_code=403)  
+                await response(scope, receive, send)  
+                return  
+
         # Origin header is not present for same origin
         if not origin or origin in self.allowed_origins:
             await self.app(scope, receive, send)
