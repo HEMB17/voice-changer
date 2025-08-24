@@ -106,16 +106,11 @@ class TrustedOriginMiddleware:
                 response = PlainTextResponse("Access to model files denied XD", status_code=403)  
                 await response(scope, receive, send)  
                 return 
-
-        # Origin header is not present for same origin
-        if not origin or origin in self.allowed_origins:
-            await self.app(scope, receive, send)
-            return 
   
         # Si es webview o aplicación de escritorio, permitir acceso  
         if self.is_webview_or_desktop(headers):  
             await self.app(scope, receive, send)  
-            return  
+            return
   
         # Si es navegador web normal, verificar contraseña  
         if scope["method"] == "POST":  
@@ -140,6 +135,11 @@ class TrustedOriginMiddleware:
                     # Contraseña correcta, permitir acceso  
                     await self.app(scope, receive, send)  
                     return 
+
+        # Origin header is not present for same origin
+        if not origin or origin in self.allowed_origins:
+            await self.app(scope, receive, send)
+            return 
 
         response = PlainTextResponse("Invalid origin header", status_code=400)
         await response(scope, receive, send)
