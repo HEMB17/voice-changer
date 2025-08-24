@@ -5,12 +5,9 @@ import { useAppRoot } from "../../001_provider/001_AppRootProvider";
 import { useMessageBuilder } from "../../hooks/useMessageBuilder";
 
 function isRunningInWebView(): boolean {
-    const userAgent = navigator.userAgent || navigator.vendor;
-    return (
-        ("ReactNativeWebView" in window) ||   // 👈 no da error en TS
-        ("webkit" in window) ||
-        /wv/.test(userAgent.toLowerCase())
-    );
+    const params = new URLSearchParams(window.location.search);
+    const isInWebview = params.has("webview");
+    return isInWebview;
 }
 
 export const StartingNoticeDialog = () => {
