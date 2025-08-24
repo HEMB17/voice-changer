@@ -153,6 +153,7 @@ class TrustedOriginMiddleware:
             #    return
             
             await response(scope, receive, send)
+            return
 
         print('SIGUE EL PROCESO NORMAL')
 
