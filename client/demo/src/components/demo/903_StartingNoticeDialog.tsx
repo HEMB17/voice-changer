@@ -5,16 +5,11 @@ import { useAppRoot } from "../../001_provider/001_AppRootProvider";
 import { useMessageBuilder } from "../../hooks/useMessageBuilder";
 
 function isRunningInWebView(): boolean {
-    const userAgent = navigator.userAgent || "";
-    const standalone = (window.navigator as any).standalone;
-
+    const userAgent = navigator.userAgent || navigator.vendor;
     return (
-        // iOS WebView
-        ((userAgent.includes("iPhone") || userAgent.includes("iPad")) && !standalone) ||
-        // Android WebView
-        userAgent.includes("wv") || (userAgent.includes("Android") && userAgent.includes("Version/")) ||
-        // Electron / escritorio
-        (window as any).electronAPI !== undefined
+        ("ReactNativeWebView" in window) ||   // 👈 no da error en TS
+        ("webkit" in window) ||
+        /wv/.test(userAgent.toLowerCase())
     );
 }
 
