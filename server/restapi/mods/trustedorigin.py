@@ -118,8 +118,7 @@ class TrustedOriginMiddleware:
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         
-        logger.info("VALIDANDO ORIGEN HUSA.IA")
-        print("VALIDANDO ORIGEN HUSA.IA")
+        print("VALIDANDO ORIGEN HUSA.IAAA")
         if scope["type"] not in (
             "http",
             "websocket",
