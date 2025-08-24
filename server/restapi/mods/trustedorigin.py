@@ -24,6 +24,56 @@ class TrustedOriginMiddleware:
 
         self.app = app
 
+    def is_webview_or_desktop(self, headers: Headers) -> bool:  
+        """Detecta si la solicitud viene de webview o aplicación de escritorio"""  
+        user_agent = headers.get("user-agent", "").lower()  
+          
+        # Detecta Electron (aplicación de escritorio)  
+        if "electron" in user_agent:  
+            return True  
+              
+        # Detecta webviews comunes  
+        webview_indicators = [  
+            "webview",  
+            "wkwebview",   
+            "android",  
+            "mobile",  
+            "cordova",  
+            "phonegap"  
+        ]  
+          
+        return any(indicator in user_agent for indicator in webview_indicators)  
+  
+    def get_password_form(self) -> str:  
+        """Retorna el formulario HTML para pedir contraseña"""  
+        return """  
+        <!DOCTYPE html>  
+        <html>  
+        <head>  
+            <title>Voice Changer - Acceso Requerido</title>  
+            <style>  
+                body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f0f0; }  
+                .login-form { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }  
+                input[type="password"] { width: 200px; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; }  
+                button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }  
+                button:hover { background: #0056b3; }  
+                .error { color: red; margin-top: 10px; }  
+            </style>  
+        </head>  
+        <body>  
+            <div class="login-form">  
+                <h2>Voice Changer</h2>  
+                <p>Acceso desde navegador web detectado. Ingrese la contraseña:</p>  
+                <form method="POST">  
+                    <input type="password" name="password" placeholder="Contraseña" required>  
+                    <br>  
+                    <button type="submit">Acceder</button>  
+                </form>  
+            </div>  
+        </body>  
+        </html>  
+        """ 
+
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] not in (
             "http",
@@ -60,7 +110,36 @@ class TrustedOriginMiddleware:
         # Origin header is not present for same origin
         if not origin or origin in self.allowed_origins:
             await self.app(scope, receive, send)
-            return
+            return 
+  
+        # Si es webview o aplicación de escritorio, permitir acceso  
+        if self.is_webview_or_desktop(headers):  
+            await self.app(scope, receive, send)  
+            return  
+  
+        # Si es navegador web normal, verificar contraseña  
+        if scope["method"] == "POST":  
+            # Leer el cuerpo de la solicitud para obtener la contraseña  
+            body = b""  
+            more_body = True  
+            while more_body:  
+                message = await receive()  
+                body += message.get("body", b"")  
+                more_body = message.get("more_body", False)  
+              
+            # Parsear la contraseña del formulario  
+            body_str = body.decode("utf-8")  
+            if "password=" in body_str:  
+                password = body_str.split("password=")[1].split("&")[0]  
+                # Decodificar URL encoding  
+                import urllib.parse  
+                password = urllib.parse.unquote_plus(password)  
+                  
+                # Verificar contraseña hardcodeada  
+                if password == self.HARDCODED_PASSWORD:  
+                    # Contraseña correcta, permitir acceso  
+                    await self.app(scope, receive, send)  
+                    return 
 
         response = PlainTextResponse("Invalid origin header", status_code=400)
         await response(scope, receive, send)
