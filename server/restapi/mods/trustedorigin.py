@@ -5,10 +5,6 @@ from starlette.datastructures import Headers
 from starlette.responses import PlainTextResponse, Response
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-import logging
-
-logger = logging.getLogger("uvicorn.error")
-
 class TrustedOriginMiddleware:
     def __init__(
         self,
@@ -126,6 +122,8 @@ class TrustedOriginMiddleware:
             await self.app(scope, receive, send)
             return
 
+        
+        print("PASA A VALIDAR MODEL DIR")
         headers = Headers(scope=scope)
         origin = headers.get("origin", "")
         path = scope.get("path", "") 
@@ -153,12 +151,12 @@ class TrustedOriginMiddleware:
   
         # Si es webview o aplicación de escritorio, permitir acceso  
         if self.is_webview_or_desktop(headers): 
-            logger.info("🚀 ESTOY DESDE APP")
+            print("🚀 ESTOY DESDE APP")
             if not origin or origin in self.allowed_origins:
                 await self.app(scope, receive, send)
                 return
         else:
-            logger.info("🚀 ESTOY DESDE APP")
+            print("🚀 ESTOY DESDE WEB")
   
         # Si es navegador web normal, verificar contraseña  
         if scope["method"] == "POST":  
