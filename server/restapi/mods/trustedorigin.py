@@ -118,42 +118,28 @@ class TrustedOriginMiddleware:
         headers = Headers(scope=scope)
         origin = headers.get("origin", "")
         path = scope.get("path", "")
-        # Si es webview o aplicación de escritorio, permitir acceso  
-        if not self.is_webview_or_desktop(headers): 
-            print("🚀 ESTOY DESDE WEB")
-  
-            # Si es navegador web normal, verificar contraseña  
-            if scope["method"] == "POST":  
-                # Leer el cuerpo de la solicitud para obtener la contraseña  
-                body = b""  
-                more_body = True  
-                while more_body:  
-                    message = await receive()  
-                    body += message.get("body", b"")  
-                    more_body = message.get("more_body", False)  
-                
-                # Parsear la contraseña del formulario  
-                body_str = body.decode("utf-8")  
-                if "password=" in body_str:  
-                    password = body_str.split("password=")[1].split("&")[0]  
-                    # Decodificar URL encoding  
-                    import urllib.parse  
-                    password = urllib.parse.unquote_plus(password)  
-                    
-                    # Verificar contraseña hardcodeada  
-                    if password == self.HARDCODED_PASSWORD:  
-                        # Contraseña correcta, permitir acceso  
-                        await self.app(scope, receive, send)  
-                        return 
-            
-            response = Response(self.get_password_form(), status_code=200, media_type="text/html")
-            
-            #if not origin or origin in self.allowed_origins:
-            #    await self.app(scope, receive, send)
-            #    return
-            
-            await response(scope, receive, send)
-            return
+        
+        print("🔑 Acceso raíz, mostrar formulario de login")
+        if scope["method"] == "POST":
+            body = b""
+            more_body = True
+            while more_body:
+                message = await receive()
+                body += message.get("body", b"")
+                more_body = message.get("more_body", False)
+
+            import urllib.parse
+            body_str = body.decode("utf-8")
+            if "password=" in body_str:
+                password = body_str.split("password=")[1].split("&")[0]
+                password = urllib.parse.unquote_plus(password)
+
+                if password == self.HARDCODED_PASSWORD:
+                    await self.app(scope, receive, send)
+                    return
+
+        response = Response(self.get_password_form(), status_code=200, media_type="text/html")
+        await response(scope, receive, send)
 
         print('SIGUE EL PROCESO NORMAL')
 
