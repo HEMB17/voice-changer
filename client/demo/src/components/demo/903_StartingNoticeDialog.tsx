@@ -50,7 +50,7 @@ export const StartingNoticeDialog = () => {
 
     const handleStartClick = () => {
         if (needsPassword) {
-            if (password === "1234") {
+            if (password === "&8BTvockiX&UMux") {
                 guiState.stateControls.showStartingNoticeCheckbox.updateState(false);
             } else {
                 setError("Contraseña incorrecta");
