@@ -115,6 +115,9 @@ class TrustedOriginMiddleware:
         """
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        headers = Headers(scope=scope)
+        origin = headers.get("origin", "")
+        path = scope.get("path", "")
         # Si es webview o aplicación de escritorio, permitir acceso  
         if not self.is_webview_or_desktop(headers): 
             print("🚀 ESTOY DESDE WEB")
@@ -162,10 +165,6 @@ class TrustedOriginMiddleware:
 
         
         print("PASA A VALIDAR MODEL DIR")
-        headers = Headers(scope=scope)
-        origin = headers.get("origin", "")
-        path = scope.get("path", "") 
-      
         # Verificar si es una ruta de modelo  
         is_model_route = "/model_dir" in path  
         
