@@ -117,7 +117,6 @@ class TrustedOriginMiddleware:
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         # Si es webview o aplicación de escritorio, permitir acceso  
         if not self.is_webview_or_desktop(headers): 
-            print("🚀 ESTOY DESDE APP")
             print("🚀 ESTOY DESDE WEB")
   
             # Si es navegador web normal, verificar contraseña  
@@ -151,6 +150,8 @@ class TrustedOriginMiddleware:
             #    return
             
             await response(scope, receive, send)
+
+        print('SIGUE EL PROCESO NORMAL')
 
         if scope["type"] not in (
             "http",
