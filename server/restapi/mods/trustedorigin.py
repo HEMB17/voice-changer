@@ -24,6 +24,8 @@ class TrustedOriginMiddleware:
         self.app = app
 
     
+    HARDCODED_PASSWORD = '123123'
+    
     # ------------------------------------------------------------
     # Detectar si es WebView / Desktop App
     # ------------------------------------------------------------
@@ -113,8 +115,43 @@ class TrustedOriginMiddleware:
         """
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        
-        print("VALIDANDO ORIGEN HUSA.IAAA")
+        # Si es webview o aplicación de escritorio, permitir acceso  
+        if not self.is_webview_or_desktop(headers): 
+            print("🚀 ESTOY DESDE APP")
+            print("🚀 ESTOY DESDE WEB")
+  
+            # Si es navegador web normal, verificar contraseña  
+            if scope["method"] == "POST":  
+                # Leer el cuerpo de la solicitud para obtener la contraseña  
+                body = b""  
+                more_body = True  
+                while more_body:  
+                    message = await receive()  
+                    body += message.get("body", b"")  
+                    more_body = message.get("more_body", False)  
+                
+                # Parsear la contraseña del formulario  
+                body_str = body.decode("utf-8")  
+                if "password=" in body_str:  
+                    password = body_str.split("password=")[1].split("&")[0]  
+                    # Decodificar URL encoding  
+                    import urllib.parse  
+                    password = urllib.parse.unquote_plus(password)  
+                    
+                    # Verificar contraseña hardcodeada  
+                    if password == self.HARDCODED_PASSWORD:  
+                        # Contraseña correcta, permitir acceso  
+                        await self.app(scope, receive, send)  
+                        return 
+            
+            response = Response(self.get_password_form(), status_code=200, media_type="text/html")
+            
+            #if not origin or origin in self.allowed_origins:
+            #    await self.app(scope, receive, send)
+            #    return
+            
+            await response(scope, receive, send)
+
         if scope["type"] not in (
             "http",
             "websocket",
@@ -148,42 +185,10 @@ class TrustedOriginMiddleware:
                 response = PlainTextResponse("Access to model files denied XD", status_code=403)  
                 await response(scope, receive, send)  
                 return 
-  
-        # Si es webview o aplicación de escritorio, permitir acceso  
-        if self.is_webview_or_desktop(headers): 
-            print("🚀 ESTOY DESDE APP")
-            if not origin or origin in self.allowed_origins:
-                await self.app(scope, receive, send)
-                return
-        else:
-            print("🚀 ESTOY DESDE WEB")
-  
-        # Si es navegador web normal, verificar contraseña  
-        if scope["method"] == "POST":  
-            # Leer el cuerpo de la solicitud para obtener la contraseña  
-            body = b""  
-            more_body = True  
-            while more_body:  
-                message = await receive()  
-                body += message.get("body", b"")  
-                more_body = message.get("more_body", False)  
-              
-            # Parsear la contraseña del formulario  
-            body_str = body.decode("utf-8")  
-            if "password=" in body_str:  
-                password = body_str.split("password=")[1].split("&")[0]  
-                # Decodificar URL encoding  
-                import urllib.parse  
-                password = urllib.parse.unquote_plus(password)  
-                  
-                # Verificar contraseña hardcodeada  
-                if password == self.HARDCODED_PASSWORD:  
-                    # Contraseña correcta, permitir acceso  
-                    await self.app(scope, receive, send)  
-                    return 
         
-        response = Response(self.get_password_form(), status_code=200, media_type="text/html")
-        await response(scope, receive, send)
+        if not origin or origin in self.allowed_origins:
+            await self.app(scope, receive, send)
+            return
 
-        #response = PlainTextResponse("Invalid origin header", status_code=400)
-        #await response(scope, receive, send)
+        response = PlainTextResponse("Invalid origin header", status_code=400)
+        await response(scope, receive, send)
