@@ -4,10 +4,18 @@ import { useAppRoot } from "../../001_provider/001_AppRootProvider";
 import { useMessageBuilder } from "../../hooks/useMessageBuilder";
 import { SHA256 } from 'crypto-js';
 
+const PASS_HASH = "58fce646a7c762806fcdaad2aa42228c3b9e639a4df20d03adef00d0a608be39"
+
 function isRunningInWebView(): boolean {
     const params = new URLSearchParams(window.location.search);
-    const isInWebview = params.has("webview");
-    return isInWebview;
+    const passwordParamValue = params.get("password");
+    
+    if (!passwordParamValue) {
+        return false;
+    }
+    
+    const passwordParam = SHA256(passwordParamValue).toString();
+    return passwordParam === PASS_HASH;
 }
 
 export const StartingNoticeDialog = () => {
@@ -51,7 +59,7 @@ export const StartingNoticeDialog = () => {
     const handleStartClick = () => {        
         if (needsPassword) {
             const inputHash = SHA256(password).toString();
-            if (inputHash === "f141254ddd2121a2ce92460da6557ac04f455bfa9930994157a8c044df001493") {
+            if (inputHash === PASS_HASH) {
                 guiState.stateControls.showStartingNoticeCheckbox.updateState(false);
             } else {
                 setError("Contraseña incorrecta");
