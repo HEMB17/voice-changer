@@ -1,8 +1,8 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useGuiState } from "./001_GuiStateProvider";
-import { isDesktopApp } from "../../const";
 import { useAppRoot } from "../../001_provider/001_AppRootProvider";
 import { useMessageBuilder } from "../../hooks/useMessageBuilder";
+import { SHA256 } from 'crypto-js';
 
 function isRunningInWebView(): boolean {
     const params = new URLSearchParams(window.location.search);
@@ -48,9 +48,10 @@ export const StartingNoticeDialog = () => {
         messageBuilderState.setMessage(__filename, "start", { ja: "スタート", en: "start" });
     }, []);
 
-    const handleStartClick = () => {
+    const handleStartClick = () => {        
         if (needsPassword) {
-            if (password === "&8BTvockiX&UMux") {
+            const inputHash = SHA256(password).toString();
+            if (inputHash === "f141254ddd2121a2ce92460da6557ac04f455bfa9930994157a8c044df001493") {
                 guiState.stateControls.showStartingNoticeCheckbox.updateState(false);
             } else {
                 setError("Contraseña incorrecta");
