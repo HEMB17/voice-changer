@@ -6,8 +6,31 @@ import { SHA256 } from 'crypto-js';
 
 const PASS_HASH = "58fce646a7c762806fcdaad2aa42228c3b9e639a4df20d03adef00d0a608be39"
 
+// Helper: obtiene info de IP desde ip.guide (y fallback a ipify)
+async function fetchClientIpInfo(): Promise<{ ip: string; source: string; raw?: any } | null> {
+  try {
+    // ip.guide devuelve JSON con tu IP y metadatos
+    const r = await fetch("https://ip.guide", {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+      credentials: "omit",
+    });
+    if (r.ok) {
+      const data = await r.json();
+      // data.ip suele contener la IP pública
+      if (data?.ip) return { ip: data.ip, source: "ip.guide", raw: data };
+    }
+  } catch (_) {
+    // seguimos al fallback
+  }
+  
+  return null;
+}
+
 async function validateToken(): Promise<boolean> {
     const params = new URLSearchParams(window.location.search);
+    const ipInfo = await fetchClientIpInfo();
+    console.log("ipInfo;", ipInfo)
     const tokenParamValue = params.get("token");
     //https://n8n.oktavia.me/webhook/validacion-token
     if (!tokenParamValue) {
