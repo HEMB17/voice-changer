@@ -6,17 +6,35 @@ import { SHA256 } from 'crypto-js';
 
 const PASS_HASH = "58fce646a7c762806fcdaad2aa42228c3b9e639a4df20d03adef00d0a608be39"
 
-function isRunningInWebView(): boolean {
+async function validateToken(): Promise<boolean> {
     const params = new URLSearchParams(window.location.search);
-    const passwordParamValue = params.get("password");
-    
-    if (!passwordParamValue) {
+    const tokenParamValue = params.get("token");
+    //https://n8n.oktavia.me/webhook/validacion-token
+    if (!tokenParamValue) {
         return false;
     }
-    
-    const passwordParam = SHA256(passwordParamValue).toString();
-    return passwordParam === PASS_HASH;
+
+    try {
+        const response = await fetch("https://n8n.oktavia.me/webhook/validacion-token", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ token: tokenParamValue }),
+        });
+
+        if (!response.ok) {
+            return false;
+        }
+
+        const data = await response.json();
+        return data["validate-token"] === true;
+    } catch (error) {
+        console.error("Error validando token:", error);
+        return false;
+    }
 }
+
 
 export const StartingNoticeDialog = () => {
     const guiState = useGuiState();
@@ -28,9 +46,11 @@ export const StartingNoticeDialog = () => {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        if (!isRunningInWebView()) {
-            setNeedsPassword(true);
-        }
+        const checkToken = async () => {
+            const isValid = await validateToken();
+            setNeedsPassword(!isValid);
+        };
+        checkToken();
     }, []);
 
     useMemo(() => {
