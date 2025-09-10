@@ -41,7 +41,7 @@ export const StartingNoticeDialog = () => {
     const { appGuiSettingState } = useAppRoot();
     const messageBuilderState = useMessageBuilder();
 
-    const [needsPassword, setNeedsPassword] = useState(false);
+    const [needsPassword, setNeedsPassword] = useState(true);
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
